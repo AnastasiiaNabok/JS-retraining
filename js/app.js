@@ -47,6 +47,7 @@
         countLeft();
 
     });
+
 })(window);
 
 function addElement(itemName) {
@@ -61,6 +62,17 @@ function addElement(itemName) {
         newLi.classList.toggle('completed',this.checked);
         countLeft();
     };
+    var editingListener = function (e) {
+        var newInputEditVal = newInputEdit.value.trim();
+        if (newInputEditVal) {
+            newLabel.innerHTML = newInputEditVal;
+        } else {
+            newInputEdit.value = newLabel.innerHTML;
+        }
+        newLi.classList.remove('editing');
+
+    };
+
 
     newDiv.classList.add('view');
     newInputCheckbox.classList.add('toggle');
@@ -68,6 +80,7 @@ function addElement(itemName) {
     newButton.classList.add('destroy');
     newInputEdit.classList.add('edit');
     newLabel.innerHTML = itemName;
+    newInputEdit.value = itemName;
 
     newDiv.appendChild(newInputCheckbox);
     newDiv.appendChild(newLabel);
@@ -84,8 +97,24 @@ function addElement(itemName) {
         countLeft();
     });
 
+
+    newLabel.addEventListener('dblclick', function (e) {
+        newLi.classList.add('editing');
+        newInputEdit.focus();
+    });
+
+    newInputEdit.addEventListener('blur', editingListener);
+
+    newInputEdit.addEventListener('keydown', function (e){
+        if (e.keyCode === 13) {
+            editingListener();
+        }
+    });
+
+
     return newLi;
 }
+
 
 function countLeft() {
     var newTodoContainer = document.getElementById('todo-list');
