@@ -12,6 +12,7 @@
         if (key === 13 && newTodoElVal) {
             newTodoEl.value = '';
             newTodoContainer.appendChild(addElement(newTodoElVal));
+            routing();
             countLeft();
         }
     });
@@ -43,11 +44,65 @@
         for (index; index < itemsLength ; index++) {
             newTodoContainer.removeChild(items[index]);
         }
-
         countLeft();
 
     });
 
+    window.addEventListener('hashchange', routing);
+
+    function routing() {
+        var items;
+        var itemsHidden;
+        var index = 0;
+        var itemsLength ;
+        var itemsHiddenLength;
+
+        var selectedItem = document.querySelector('.selected');
+        selectedItem.classList.remove('selected');
+
+        if (location.hash === '#/completed'){
+            selectedItem = document.querySelector('a[href="#/completed"]');
+            selectedItem.classList.add('selected');
+
+            itemsHidden = newTodoContainer.querySelectorAll('li.hidden');
+            items = newTodoContainer.querySelectorAll('li:not(.completed)');
+            itemsLength = items.length;
+            itemsHiddenLength = itemsHidden.length;
+            for (index; index < itemsHiddenLength ; index++) {
+                itemsHidden[index].classList.remove('hidden');
+            }
+            for (index = 0; index < itemsLength ; index++) {
+                items[index].classList.add('hidden');
+            }
+        } else if (location.hash === '#/active'){
+            selectedItem = document.querySelector('a[href="#/active"]');
+            selectedItem.classList.add('selected');
+
+            itemsHidden = newTodoContainer.querySelectorAll('li.hidden');
+            items = newTodoContainer.querySelectorAll('li.completed');
+            itemsLength = items.length;
+            itemsHiddenLength = itemsHidden.length;
+
+            for (index; index < itemsHiddenLength ; index++) {
+                itemsHidden[index].classList.remove('hidden');
+            }
+            for (index = 0; index < itemsLength ; index++) {
+                items[index].classList.add('hidden');
+            }
+        } else {
+            selectedItem = document.querySelector('a[href="#/"]');
+            selectedItem.classList.add('selected');
+
+            itemsHidden = newTodoContainer.querySelectorAll('li.hidden');
+            itemsHiddenLength = itemsHidden.length;
+
+            for (index; index < itemsHiddenLength ; index++) {
+                itemsHidden[index].classList.remove('hidden');
+            }
+        }
+    }
+
+    routing();
 })(window);
 
 function addElement(itemName) {
