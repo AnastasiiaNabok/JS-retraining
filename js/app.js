@@ -1,48 +1,50 @@
+ $(document).ready();
+
 (function (window) {
     'use strict';
 
-    var newTodoEl = document.getElementById('new-todo');
-    var newTodoContainer = document.getElementById('todo-list');
-    var toggleAll = document.querySelector('.toggle-all');
-    var clearCompleted = document.querySelector('.clear-completed');
+    var newTodoEl = $('#new-todo');
+    var newTodoContainer = $('#todo-list');
+    var toggleAll = $('.toggle-all');
+    var clearCompleted = $('.clear-completed');
 
-    newTodoEl.addEventListener('keydown', function (e) {
+    newTodoEl.on('keydown', function (e) {
         var key = e.which || e.keyCode;
-        var newTodoElVal = newTodoEl.value.trim();
+        var newTodoElVal = $.trim(newTodoEl.val());
         if (key === 13 && newTodoElVal) {
-            newTodoEl.value = '';
-            newTodoContainer.appendChild(addElement(newTodoElVal));
+            newTodoEl.val('');
+            newTodoContainer.append(addElement(newTodoElVal));
             routing();
             countLeft();
         }
     });
 
 
-    toggleAll.addEventListener('click', function (e){
+    toggleAll.on('click', function (e){
         var items;
         var index = 0;
         var itemsLength;
         if (this.checked) {
-            items = newTodoContainer.querySelectorAll('li:not(.completed)');
+            items = newTodoContainer.find('li:not(.completed)');
         } else {
-            items = newTodoContainer.querySelectorAll('li.completed');
+            items = newTodoContainer.find('li.completed');
         }
 
         itemsLength = items.length;
 
         for (index; index < itemsLength ; index++) {
-            items[index].classList.toggle('completed', this.checked);
-            items[index].querySelector('input[type="checkbox"]').checked = this.checked;
+            $(items[index]).toggleClass('completed');
+            $(items[index]).find('input[type="checkbox"]').checked = this.checked;
         }
     });
 
-    clearCompleted.addEventListener('click', function (e) {
-        var items = newTodoContainer.querySelectorAll('li.completed');
+    clearCompleted.on('click', function (e) {
+        var items = newTodoContainer.find('li.completed');
         var index = 0;
         var itemsLength = items.length;
 
         for (index; index < itemsLength ; index++) {
-            newTodoContainer.removeChild(items[index]);
+            newTodoContainer.remove(items[index]);
         }
         countLeft();
 
@@ -57,47 +59,47 @@
         var itemsLength ;
         var itemsHiddenLength;
 
-        var selectedItem = document.querySelector('.selected');
-        selectedItem.classList.remove('selected');
+        var selectedItem = $('.selected');
+        selectedItem.removeClass('selected');
 
         if (location.hash === '#/completed'){
-            selectedItem = document.querySelector('a[href="#/completed"]');
-            selectedItem.classList.add('selected');
+            selectedItem = $('a[href="#/completed"]');
+            selectedItem.addClass('selected');
 
-            itemsHidden = newTodoContainer.querySelectorAll('li.hidden');
-            items = newTodoContainer.querySelectorAll('li:not(.completed)');
+            itemsHidden = newTodoContainer.find('li.hidden');
+            items = newTodoContainer.find('li:not(.completed)');
             itemsLength = items.length;
             itemsHiddenLength = itemsHidden.length;
             for (index; index < itemsHiddenLength ; index++) {
-                itemsHidden[index].classList.remove('hidden');
+                $(itemsHidden[index]).removeClass('hidden');
             }
             for (index = 0; index < itemsLength ; index++) {
-                items[index].classList.add('hidden');
+                $(items[index]).addClass('hidden');
             }
         } else if (location.hash === '#/active'){
-            selectedItem = document.querySelector('a[href="#/active"]');
-            selectedItem.classList.add('selected');
+            selectedItem = $('a[href="#/active"]');
+            selectedItem.addClass('selected');
 
-            itemsHidden = newTodoContainer.querySelectorAll('li.hidden');
-            items = newTodoContainer.querySelectorAll('li.completed');
+            itemsHidden = newTodoContainer.find('li.hidden');
+            items = newTodoContainer.find('li.completed');
             itemsLength = items.length;
             itemsHiddenLength = itemsHidden.length;
 
             for (index; index < itemsHiddenLength ; index++) {
-                itemsHidden[index].classList.remove('hidden');
+                $(itemsHidden[index]).removeClass('hidden');
             }
             for (index = 0; index < itemsLength ; index++) {
-                items[index].classList.add('hidden');
+                $(items[index]).addClass('hidden');
             }
         } else {
-            selectedItem = document.querySelector('a[href="#/"]');
-            selectedItem.classList.add('selected');
+            selectedItem = $('a[href="#/"]');
+            selectedItem.addClass('selected');
 
-            itemsHidden = newTodoContainer.querySelectorAll('li.hidden');
+            itemsHidden = newTodoContainer.find('li.hidden');
             itemsHiddenLength = itemsHidden.length;
 
             for (index; index < itemsHiddenLength ; index++) {
-                itemsHidden[index].classList.remove('hidden');
+                $(itemsHidden[index]).removeClass('hidden');
             }
         }
     }
@@ -106,61 +108,56 @@
 })(window);
 
 function addElement(itemName) {
-    var newLi = document.createElement('li');
-    var newDiv = document.createElement('div');
-    var newInputCheckbox = document.createElement('input');
-    var newInputEdit = document.createElement('input');
-    var newLabel = document.createElement('label');
-    var newButton = document.createElement('button');
-    var newTodoContainer = document.getElementById('todo-list');
+    var newLi = $('<li/>');
+    var newDiv = $('<div/>',{class:"view"});
+    var newInputCheckbox = $('<input/>',{type:"checkbox", class: "toggle"});
+    var newInputEdit = $('<input/>',{class:"edit"});
+    var newLabel = $('<label/>');
+    var newButton = $('<button/>',{class:"destroy"});
+    var newTodoContainer = $('#todo-list');
     var newInputCheckboxListener = function (e) {
-        newLi.classList.toggle('completed',this.checked);
+        newLi.toggleClass('completed');
         countLeft();
     };
     var editingListener = function (e) {
-        var newInputEditVal = newInputEdit.value.trim();
+        var newInputEditVal = $.trim(newInputEdit.val());
         if (newInputEditVal) {
-            newLabel.innerHTML = newInputEditVal;
+            newLabel.html(newInputEditVal);
         } else {
-            newInputEdit.value = newLabel.innerHTML;
+            newInputEdit.val(newLabel.html());
         }
-        newLi.classList.remove('editing');
+        newLi.removeClass('editing');
 
     };
 
 
-    newDiv.classList.add('view');
-    newInputCheckbox.classList.add('toggle');
-    newInputCheckbox.type = 'checkbox';
-    newButton.classList.add('destroy');
-    newInputEdit.classList.add('edit');
-    newLabel.innerHTML = itemName;
-    newInputEdit.value = itemName;
+    newLabel.html(itemName);
+    newInputEdit.val(itemName);
 
-    newDiv.appendChild(newInputCheckbox);
-    newDiv.appendChild(newLabel);
-    newDiv.appendChild(newButton);
-    newLi.appendChild(newDiv);
-    newLi.appendChild(newInputEdit);
+    newDiv.append(newInputCheckbox);
+    newDiv.append(newLabel);
+    newDiv.append(newButton);
+    newLi.append(newDiv);
+    newLi.append(newInputEdit);
 
-    newInputCheckbox.addEventListener('click', newInputCheckboxListener);
+    newInputCheckbox.on('click', newInputCheckboxListener);
 
-    newButton.addEventListener('click', function _func(e){
-        newInputCheckbox.removeEventListener('click', newInputCheckboxListener);
-        newButton.removeEventListener('click', _func);
-        newTodoContainer.removeChild(newLi);
+    newButton.on('click', function _func(e){
+        newInputCheckbox.off('click', newInputCheckboxListener);
+        newButton.off('click', _func);
+        newTodoContainer.remove(newLi);
         countLeft();
     });
 
 
-    newLabel.addEventListener('dblclick', function (e) {
-        newLi.classList.add('editing');
+    newLabel.on('dblclick', function (e) {
+        newLi.addClass('editing');
         newInputEdit.focus();
     });
 
-    newInputEdit.addEventListener('blur', editingListener);
+    newInputEdit.on('blur', editingListener);
 
-    newInputEdit.addEventListener('keydown', function (e){
+    newInputEdit.on('keydown', function (e){
         if (e.keyCode === 13) {
             editingListener();
         }
@@ -172,9 +169,9 @@ function addElement(itemName) {
 
 
 function countLeft() {
-    var newTodoContainer = document.getElementById('todo-list');
-    var totalNumber = newTodoContainer.childElementCount;
-    var completedNumber = newTodoContainer.querySelectorAll('li.completed');
+    var newTodoContainer = $('#todo-list');
+    var totalNumber = newTodoContainer.children().length;
+    var completedNumber = newTodoContainer.find('li.completed');
 
-    document.querySelector('span > strong').innerHTML = totalNumber - (completedNumber ? completedNumber.length : 0);
+    $('span > strong').html(totalNumber - (completedNumber ? completedNumber.length : 0));
 }
