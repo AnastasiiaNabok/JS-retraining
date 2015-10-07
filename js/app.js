@@ -39,18 +39,12 @@
     });
 
     clearCompleted.on('click', function (e) {
-        var items = newTodoContainer.find('li.completed');
-        var index = 0;
-        var itemsLength = items.length;
-
-        for (index; index < itemsLength ; index++) {
-            newTodoContainer.remove(items[index]);
-        }
+        newTodoContainer.find('li.completed').remove();
         countLeft();
 
     });
 
-    window.addEventListener('hashchange', routing);
+    window.onhashchange = routing;
 
     function routing() {
         var items;
@@ -145,7 +139,7 @@ function addElement(itemName) {
     newButton.on('click', function _func(e){
         newInputCheckbox.off('click', newInputCheckboxListener);
         newButton.off('click', _func);
-        newTodoContainer.remove(newLi);
+        newLi.remove();
         countLeft();
     });
 
