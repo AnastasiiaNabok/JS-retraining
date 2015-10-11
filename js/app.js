@@ -1,11 +1,12 @@
-var ToDo = (function (curentID) {
+var ToDo = function (curentID) {
     'use strict';
 
-    var RootEle = $('#' + curentID);
-    var newTodoEl = RootEle.find('.new-todo');
-    var newTodoContainer = RootEle.find('.todo-list');
-    var toggleAll = RootEle.find('.toggle-all');
-    var clearCompleted = RootEle.find('.clear-completed');
+    var rootEl = $('#' + curentID);
+    var newTodoEl = rootEl.find('.new-todo');
+    var newTodoContainer = rootEl.find('.todo-list');
+    var toggleAll = rootEl.find('.toggle-all');
+    var clearCompleted = rootEl.find('.clear-completed');
+    var localStor = [];
 
     newTodoEl.on('keydown', function (e) {
         var key = e.which || e.keyCode;
@@ -14,15 +15,15 @@ var ToDo = (function (curentID) {
         if (key === ENTER_KEY_CODE && newTodoElVal) {
             newTodoEl.val('');
             newTodoContainer.append(addElement(newTodoElVal));
-            routing();
+            localStor.push(newTodoElVal);
+            localStorage.setItem(curentID, localStor);
             countLeft();
         }
     });
 
-
-    toggleAll.on('click', function (){
+    toggleAll.on('click', function () {
         var index = 0;
-        var items,itemsLength;
+        var items, itemsLength;
         if (this.checked) {
             items = newTodoContainer.find('li:not(.completed)');
         } else {
@@ -30,8 +31,7 @@ var ToDo = (function (curentID) {
         }
 
         itemsLength = items.length;
-
-        for (index; index < itemsLength ; index++) {
+        for (index; index < itemsLength; index++) {
             $(items[index]).toggleClass('completed');
             $(items[index]).find('input[type="checkbox"]').checked = this.checked;
         }
@@ -40,71 +40,15 @@ var ToDo = (function (curentID) {
     clearCompleted.on('click', function () {
         newTodoContainer.find('li.completed').remove();
         countLeft();
-
     });
 
-    window.onhashchange = routing;
-
-    function routing() {
-        var items;
-        var itemsHidden;
-        var index = 0;
-        var itemsLength ;
-        var itemsHiddenLength;
-
-        var selectedItem = $('.selected');
-        selectedItem.removeClass('selected');
-
-        if (location.hash === '#/completed'){
-            selectedItem = $('a[href="#/completed"]');
-            selectedItem.addClass('selected');
-
-            itemsHidden = newTodoContainer.find('li.hidden');
-            items = newTodoContainer.find('li:not(.completed)');
-            itemsLength = items.length;
-            itemsHiddenLength = itemsHidden.length;
-            for (index; index < itemsHiddenLength ; index++) {
-                $(itemsHidden[index]).removeClass('hidden');
-            }
-            for (index = 0; index < itemsLength ; index++) {
-                $(items[index]).addClass('hidden');
-            }
-        } else if (location.hash === '#/active'){
-            selectedItem = $('a[href="#/active"]');
-            selectedItem.addClass('selected');
-
-            itemsHidden = newTodoContainer.find('li.hidden');
-            items = newTodoContainer.find('li.completed');
-            itemsLength = items.length;
-            itemsHiddenLength = itemsHidden.length;
-
-            for (index; index < itemsHiddenLength ; index++) {
-                $(itemsHidden[index]).removeClass('hidden');
-            }
-            for (index = 0; index < itemsLength ; index++) {
-                $(items[index]).addClass('hidden');
-            }
-        } else {
-            selectedItem = $('a[href="#/"]');
-            selectedItem.addClass('selected');
-
-            itemsHidden = newTodoContainer.find('li.hidden');
-            itemsHiddenLength = itemsHidden.length;
-
-            for (index; index < itemsHiddenLength ; index++) {
-                $(itemsHidden[index]).removeClass('hidden');
-            }
-        }
-    }
-
-    routing();
     function addElement(itemName) {
         var newLi = $('<li/>');
-        var newDiv = $('<div/>',{class:"view"});
-        var newInputCheckbox = $('<input/>',{type:"checkbox", class: "toggle"});
-        var newInputEdit = $('<input/>',{class:"edit"});
+        var newDiv = $('<div/>', {class: "view"});
+        var newInputCheckbox = $('<input/>', {type: "checkbox", class: "toggle"});
+        var newInputEdit = $('<input/>', {class: "edit"});
         var newLabel = $('<label/>');
-        var newButton = $('<button/>',{class:"destroy"});
+        var newButton = $('<button/>', {class: "destroy"});
         var newInputCheckboxListener = function () {
             newLi.toggleClass('completed');
             countLeft();
@@ -132,7 +76,12 @@ var ToDo = (function (curentID) {
 
         newInputCheckbox.on('click', newInputCheckboxListener);
 
-        newButton.on('click', function _func(){
+        newButton.on('click', function _func() {
+            console.log(newLi);
+            var cleanUpLocalStorInd = newLi.index();
+
+            console.log(cleanUpLocalStorInd);
+            cleanUpLocalStor(cleanUpLocalStorInd);
             newInputCheckbox.off('click', newInputCheckboxListener);
             newButton.off('click', _func);
             newLi.remove();
@@ -147,7 +96,7 @@ var ToDo = (function (curentID) {
 
         newInputEdit.on('blur', editingListener);
 
-        newInputEdit.on('keydown', function (){
+        newInputEdit.on('keydown', function () {
             if (e.keyCode === 13) {
                 editingListener();
             }
@@ -157,15 +106,20 @@ var ToDo = (function (curentID) {
         return newLi;
     }
 
+    function cleanUpLocalStor(index) {
+        localStor.splice(localStorage.getItem(curentID).split(',')[index - 1], 1);
+        localStorage.setItem(curentID, localStor);
+    }
+
 
     function countLeft() {
-        var newTodoContainer = RootEle.find('.todo-list');
+        var newTodoContainer = rootEl.find('.todo-list');
         var totalNumber = newTodoContainer.children().length;
         var completedNumber = newTodoContainer.find('li.completed');
 
-        RootEle.find('span > strong').html(totalNumber - (completedNumber ? completedNumber.length : 0));
+        rootEl.find('span > strong').html(totalNumber - (completedNumber ? completedNumber.length : 0));
     }
-});
+};
 
 (function () {
 
@@ -175,9 +129,8 @@ var ToDo = (function (curentID) {
 
         currentID = 'todo-list-' + curentIDNumber ;
 
-        $( ".todoapp" ).append( '<div id="' + currentID + '">' +
+        $( ".todoapp" ).append( '<div id="' + currentID + '" class="todo-lists">' +
             '<header class="header">' +
-                '<h1>todos</h1>' +
                 '<input class="new-todo" placeholder="What needs to be done?" autofocus>' +
             '</header>' +
             '<section class="main">' +
