@@ -1,25 +1,25 @@
-var ToDo = function (curentID) {
+var ToDo = function (query) {
     'use strict';
 
-    var rootEl = $('#' + curentID);
+    var rootEl = $(query);
     var newTodoEl = rootEl.find('.new-todo');
     var newTodoContainer = rootEl.find('.todo-list');
     var toggleAll = rootEl.find('.toggle-all');
     var clearCompleted = rootEl.find('.clear-completed');
-    var localStor = [];
+    var ENTER_KEY_CODE = 13;
 
-    newTodoEl.on('keydown', function (e) {
+    newTodoEl.on('keydown', _newTodoElKeyDown);
+    
+    function _newTodoElKeyDown (e){
         var key = e.which || e.keyCode;
         var newTodoElVal = $.trim(newTodoEl.val());
-        var ENTER_KEY_CODE = 13;
         if (key === ENTER_KEY_CODE && newTodoElVal) {
-            newTodoEl.val('');
-            newTodoContainer.append(addElement(newTodoElVal));
-            localStor.push(newTodoElVal);
-            localStorage.setItem(curentID, localStor);
-            countLeft();
-        }
-    });
+                newTodoEl.val('');
+                newTodoContainer.append(addElement(newTodoElVal));
+                countLeft();
+            }
+        };
+
 
     toggleAll.on('click', function () {
         var index = 0;
@@ -78,10 +78,6 @@ var ToDo = function (curentID) {
 
         newButton.on('click', function _func() {
             console.log(newLi);
-            var cleanUpLocalStorInd = newLi.index();
-
-            console.log(cleanUpLocalStorInd);
-            cleanUpLocalStor(cleanUpLocalStorInd);
             newInputCheckbox.off('click', newInputCheckboxListener);
             newButton.off('click', _func);
             newLi.remove();
@@ -97,18 +93,13 @@ var ToDo = function (curentID) {
         newInputEdit.on('blur', editingListener);
 
         newInputEdit.on('keydown', function () {
-            if (e.keyCode === 13) {
+            if (e.keyCode === ENTER_KEY_CODE) {
                 editingListener();
             }
         });
 
 
         return newLi;
-    }
-
-    function cleanUpLocalStor(index) {
-        localStor.splice(localStorage.getItem(curentID).split(',')[index - 1], 1);
-        localStorage.setItem(curentID, localStor);
     }
 
 
@@ -145,6 +136,7 @@ var ToDo = function (curentID) {
             '</footer>' +
         '</div>');
         curentIDNumber++;
-        ToDo (currentID);
+        var query = '#' + currentID;
+        ToDo (query);
     });
 })();
