@@ -9,7 +9,8 @@ var ToDo = function (query) {
     var ENTER_KEY_CODE = 13;
 
     newTodoEl.on('keydown', _newTodoElKeyDown);
-    
+
+    //add new element to ToDo list
     function _newTodoElKeyDown (e){
         var key = e.which || e.keyCode;
         var newTodoElVal = $.trim(newTodoEl.val());
@@ -18,10 +19,12 @@ var ToDo = function (query) {
                 newTodoContainer.append(addElement(newTodoElVal));
                 countLeft();
             }
-        };
+        }
 
+     toggleAll.on('click', _toggleAllCompleted);
 
-    toggleAll.on('click', function () {
+    //mark all as completed/not completed
+    function _toggleAllCompleted() {
         var index = 0;
         var items, itemsLength;
         if (this.checked) {
@@ -35,24 +38,46 @@ var ToDo = function (query) {
             $(items[index]).toggleClass('completed');
             $(items[index]).find('input[type="checkbox"]').checked = this.checked;
         }
-    });
+    }
 
-    clearCompleted.on('click', function () {
+    clearCompleted.on('click', _countNotCompletedItems);
+
+    //count not completed Items
+    function _countNotCompletedItems () {
         newTodoContainer.find('li.completed').remove();
         countLeft();
-    });
+    }
 
     function addElement(itemName) {
+
+
+        var todoTemplate = '<li>' +
+                '<div class="view">' +
+                    '<input class="toggle" type="checkbox">' +
+                    '<label>%text%</label>' +
+                    '<button class="destroy"></button>' +
+                '</div>'+
+                '<input class="edit" value="%text%">' +
+            '</li>';
+
+        var result = todoTemplate.replace(/%text%/g, itemName);
+
+        rootEl.find('input.toggle').on('click', _toggleClassCompleted );
+
+        function _toggleClassCompleted () {
+            rootEl('li').toggleClass('completed');
+            countLeft();
+        }
+
+
+
         var newLi = $('<li/>');
-        var newDiv = $('<div/>', {class: "view"});
         var newInputCheckbox = $('<input/>', {type: "checkbox", class: "toggle"});
         var newInputEdit = $('<input/>', {class: "edit"});
         var newLabel = $('<label/>');
         var newButton = $('<button/>', {class: "destroy"});
-        var newInputCheckboxListener = function () {
-            newLi.toggleClass('completed');
-            countLeft();
-        };
+
+
         var editingListener = function () {
             var newInputEditVal = $.trim(newInputEdit.val());
             if (newInputEditVal) {
@@ -64,17 +89,6 @@ var ToDo = function (query) {
 
         };
 
-
-        newLabel.html(itemName);
-        newInputEdit.val(itemName);
-
-        newDiv.append(newInputCheckbox);
-        newDiv.append(newLabel);
-        newDiv.append(newButton);
-        newLi.append(newDiv);
-        newLi.append(newInputEdit);
-
-        newInputCheckbox.on('click', newInputCheckboxListener);
 
         newButton.on('click', function _func() {
             console.log(newLi);
@@ -99,7 +113,7 @@ var ToDo = function (query) {
         });
 
 
-        return newLi;
+        return result;
     }
 
 
